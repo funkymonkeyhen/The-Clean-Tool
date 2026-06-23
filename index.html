@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Clean Tool</title>
+<link rel="icon" type="image/jpeg" href="cleanlogo.jpg">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -13,8 +14,8 @@
     --bg:        #0d0f14;
     --surface:   #151820;
     --border:    #252a35;
-    --accent:    #ff4d6d;
-    --accent2:   #ff8fa3;
+    --accent:    #4d8fff;
+    --accent2:   #8fb8ff;
     --text:      #e8eaf0;
     --muted:     #6b7280;
     --code-bg:   #0a0c10;
@@ -44,13 +45,16 @@
 
   .logo-icon {
     width: 40px; height: 40px;
-    background: var(--accent);
     border-radius: 10px;
-    display: grid; place-items: center;
+    overflow: hidden;
     flex-shrink: 0;
   }
 
-  .logo-icon svg { width: 20px; height: 20px; fill: #fff; }
+  .logo-icon img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
 
   .logo-text { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; }
   .logo-text span { color: var(--accent); }
@@ -90,7 +94,6 @@
   input[type="text"]::placeholder { color: var(--muted); }
   .field { margin-bottom: 20px; }
 
-  /* ── OS Toggle ── */
   .os-toggle {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -115,9 +118,8 @@
   .os-btn .os-icon { font-size: 1.3rem; }
   .os-btn small { font-size: 0.68rem; font-weight: 400; color: inherit; opacity: 0.75; }
   .os-btn:hover { border-color: var(--accent2); color: var(--text); }
-  .os-btn.active { background: #2a0d14; border-color: var(--accent); color: var(--accent); }
+  .os-btn.active { background: #0d1a2a; border-color: var(--accent); color: var(--accent); }
 
-  /* ── Format Toggle ── */
   .format-toggle {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 10px; margin-bottom: 24px;
@@ -138,7 +140,7 @@
 
   .fmt-btn small { font-size: 0.7rem; font-weight: 400; }
   .fmt-btn:hover { border-color: var(--accent2); color: var(--text); }
-  .fmt-btn.active { background: #2a0d14; border-color: var(--accent); color: var(--accent); }
+  .fmt-btn.active { background: #0d1a2a; border-color: var(--accent); color: var(--accent); }
 
   .options-grid {
     display: grid; grid-template-columns: 1fr 1fr;
@@ -179,10 +181,9 @@
     transition: background 0.18s, transform 0.1s;
   }
 
-  .generate-btn:hover { background: #e63355; }
+  .generate-btn:hover { background: #3364e6; }
   .generate-btn:active { transform: scale(0.99); }
 
-  /* ── Output ── */
   .output-card {
     display: none;
     background: var(--surface);
@@ -212,7 +213,7 @@
     border-radius: 20px;
     border: 1px solid var(--border);
     color: var(--accent2);
-    background: #1a1020;
+    background: #101820;
     letter-spacing: 0.05em;
   }
 
@@ -246,7 +247,6 @@
 
   .output-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
-  /* ── Install hint ── */
   .install-hint {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -267,7 +267,6 @@
   .error-msg { font-size: 0.8rem; color: var(--accent); margin-top: 6px; display: none; }
   .error-msg.visible { display: block; }
 
-  /* divider between sections */
   .section-divider {
     width: 100%; max-width: 620px;
     border: none; border-top: 1px solid var(--border);
@@ -286,16 +285,15 @@
 <header>
   <div class="logo">
     <div class="logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.5a8.15 8.15 0 004.77 1.52V6.57a4.86 4.86 0 01-1-.12z"/></svg>
+      <img src="cleanlogo.jpg" alt="The Clean Tool logo">
     </div>
-    <div class="logo-text">The Clean<span>Tool</span></div>
+    <div class="logo-text">The Clean <span>Tool</span></div>
   </div>
   <p>Generate <code style="font-family:JetBrains Mono,monospace;font-size:0.85em;color:var(--accent2)">yt-dlp</code> commands the clean way. No ads, no Malware.</p>
 </header>
 
 <div class="card">
 
-  <!-- OS Selector -->
   <label>Your operating system</label>
   <div class="os-toggle">
     <button class="os-btn active" id="btn-linux" onclick="setOS('linux')">
@@ -317,7 +315,6 @@
 
   <hr class="section-divider">
 
-  <!-- Format -->
   <label>Format</label>
   <div class="format-toggle">
     <button class="fmt-btn active" id="btn-mp3" onclick="setFormat('mp3')">
@@ -330,14 +327,12 @@
     </button>
   </div>
 
-  <!-- URL -->
   <div class="field">
     <label for="url-input">Clean URL</label>
     <input type="text" id="url-input" placeholder="Put in Clean Link" />
-    <div class="error-msg" id="url-error">Please enter a valid Clean URL.</div>
+    <div class="error-msg" id="url-error">Please enter a valid YouTube URL.</div>
   </div>
 
-  <!-- Quality options -->
   <div class="options-grid">
     <div class="field" id="mp3-quality-field">
       <label for="mp3-quality">Audio quality</label>
@@ -372,7 +367,6 @@
     </div>
   </div>
 
-  <!-- Extras -->
   <div class="extras">
     <label style="margin-bottom:12px">Options</label>
 
@@ -400,7 +394,6 @@
   <button class="generate-btn" onclick="generate()">Generate Command →</button>
 </div>
 
-<!-- Output -->
 <div class="output-card" id="output-card">
   <div class="output-header">
     <div class="output-title">Your Command</div>
@@ -415,7 +408,6 @@
   </div>
 </div>
 
-<!-- Install hint -->
 <div class="install-hint" id="install-hint">
   <h3>Need yt-dlp?</h3>
   <span class="os-label" id="hint-os-label">Debian / Ubuntu Linux</span>
@@ -448,7 +440,7 @@
     linux: `
       <p>Install yt-dlp and ffmpeg with apt:</p>
       <div class="command-block"><code>sudo apt install yt-dlp ffmpeg</code></div>
-      <p>Or get the latest version directly: (Recommended)</p>
+      <p>Or get the latest version directly:</p>
       <div class="command-block"><code>sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp && sudo chmod a+rx /usr/local/bin/yt-dlp</code></div>
       <p>ffmpeg is required for MP3 conversion and merging high-quality video+audio streams.</p>
     `,
@@ -480,11 +472,9 @@
     ['linux','windows','mac'].forEach(o =>
       document.getElementById('btn-' + o).classList.toggle('active', o === os)
     );
-    // Update default dir placeholder only if user hasn't typed a custom path
     const dirInput = document.getElementById('output-dir');
     const isDefault = Object.values(defaultDirs).includes(dirInput.value);
     if (isDefault) dirInput.value = defaultDirs[os];
-
     document.getElementById('hint-os-label').textContent = osHintLabels[os];
     document.getElementById('hint-content').innerHTML = installHints[os];
   }
@@ -502,15 +492,9 @@
     return /^https?:\/\/(www\.)?(youtube\.com\/(watch|playlist|shorts)|youtu\.be\/)/.test(url.trim());
   }
 
-  function quoteArg(val, os) {
-    // Wrap in OS-appropriate quotes
-    if (os === 'windows') return `"${val}"`;
-    return `"${val}"`;
-  }
-
   function generate() {
-    const url    = document.getElementById('url-input').value.trim();
-    const errEl  = document.getElementById('url-error');
+    const url     = document.getElementById('url-input').value.trim();
+    const errEl   = document.getElementById('url-error');
     const outCard = document.getElementById('output-card');
 
     if (!url || !isValidYTUrl(url)) {
@@ -526,7 +510,6 @@
     const playlist  = document.getElementById('chk-playlist').checked;
     const subs      = document.getElementById('chk-subs').checked;
 
-    // On Windows, yt-dlp.exe may be needed if not on PATH; command is otherwise identical
     let cmd = 'yt-dlp';
 
     if (currentFormat === 'mp3') {
@@ -549,7 +532,6 @@
 
     if (!playlist) cmd += ' --no-playlist';
 
-    // Path separator and output template differ by OS
     if (currentOS === 'windows') {
       const winDir = outDir.replace(/\//g, '\\');
       cmd += ` -o "${winDir}\\%(title)s.%(ext)s"`;
@@ -584,7 +566,6 @@
     alert(howToMessages[currentOS]);
   }
 
-  // Init install hint
   setOS('linux');
 
   document.getElementById('url-input').addEventListener('keydown', e => {
