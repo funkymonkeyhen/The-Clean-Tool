@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YT Grab — Download Your Videos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d0f14;
+    --surface:   #151820;
+    --border:    #252a35;
+    --accent:    #ff4d6d;
+    --accent2:   #ff8fa3;
+    --text:      #e8eaf0;
+    --muted:     #6b7280;
+    --code-bg:   #0a0c10;
+    --success:   #34d399;
+    --radius:    10px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 20px 80px;
+  }
+
+  header { text-align: center; margin-bottom: 48px; }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+
+  .logo-icon svg { width: 20px; height: 20px; fill: #fff; }
+
+  .logo-text { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; }
+  .logo-text span { color: var(--accent); }
+  header p { color: var(--muted); font-size: 0.95rem; font-weight: 300; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+    width: 100%; max-width: 620px;
+    margin-bottom: 24px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 8px;
+  }
+
+  input[type="text"], select {
+    width: 100%;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  input[type="text"]:focus, select:focus { border-color: var(--accent); }
+  input[type="text"]::placeholder { color: var(--muted); }
+  .field { margin-bottom: 20px; }
+
+  /* ── OS Toggle ── */
+  .os-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .os-btn {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem; font-weight: 600;
+    padding: 12px 8px;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+  }
+
+  .os-btn .os-icon { font-size: 1.3rem; }
+  .os-btn small { font-size: 0.68rem; font-weight: 400; color: inherit; opacity: 0.75; }
+  .os-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .os-btn.active { background: #2a0d14; border-color: var(--accent); color: var(--accent); }
+
+  /* ── Format Toggle ── */
+  .format-toggle {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 24px;
+  }
+
+  .fmt-btn {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem; font-weight: 600;
+    padding: 14px; cursor: pointer;
+    transition: all 0.18s;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+  }
+
+  .fmt-btn small { font-size: 0.7rem; font-weight: 400; }
+  .fmt-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .fmt-btn.active { background: #2a0d14; border-color: var(--accent); color: var(--accent); }
+
+  .options-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-bottom: 20px;
+  }
+
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none; color: var(--muted); font-size: 0.85rem;
+  }
+
+  .extras { margin-bottom: 24px; }
+
+  .check-row {
+    display: flex; align-items: center;
+    gap: 10px; margin-bottom: 10px; cursor: pointer;
+  }
+
+  .check-row input[type="checkbox"] {
+    width: 16px; height: 16px;
+    accent-color: var(--accent); cursor: pointer;
+  }
+
+  .check-row span { font-size: 0.9rem; color: var(--text); }
+  .check-row small { color: var(--muted); display: block; font-size: 0.75rem; }
+
+  .generate-btn {
+    width: 100%;
+    background: var(--accent); border: none;
+    border-radius: var(--radius); color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    padding: 15px; cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.18s, transform 0.1s;
+  }
+
+  .generate-btn:hover { background: #e63355; }
+  .generate-btn:active { transform: scale(0.99); }
+
+  /* ── Output ── */
+  .output-card {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 32px;
+    width: 100%; max-width: 620px;
+    margin-bottom: 24px;
+  }
+
+  .output-card.visible { display: block; }
+
+  .output-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 12px;
+  }
+
+  .output-title {
+    font-size: 0.78rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .os-badge {
+    font-size: 0.72rem; font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--accent2);
+    background: #1a1020;
+    letter-spacing: 0.05em;
+  }
+
+  .command-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px; margin-bottom: 16px;
+    overflow-x: auto;
+  }
+
+  .command-block code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem; color: var(--accent2);
+    white-space: pre-wrap; word-break: break-all;
+    line-height: 1.6;
+  }
+
+  .copy-btn {
+    background: #1e2330;
+    border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem; font-weight: 500;
+    padding: 6px 14px; cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .copy-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .copy-btn.copied { background: var(--success); border-color: var(--success); color: #0d0f14; }
+
+  .output-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* ── Install hint ── */
+  .install-hint {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 32px;
+    width: 100%; max-width: 620px;
+  }
+
+  .install-hint h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+  .install-hint .os-label {
+    font-size: 0.72rem; color: var(--accent2);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 14px; display: block;
+  }
+  .install-hint p { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; line-height: 1.6; }
+  .install-hint .command-block { margin-bottom: 8px; }
+
+  .error-msg { font-size: 0.8rem; color: var(--accent); margin-top: 6px; display: none; }
+  .error-msg.visible { display: block; }
+
+  /* divider between sections */
+  .section-divider {
+    width: 100%; max-width: 620px;
+    border: none; border-top: 1px solid var(--border);
+    margin: 4px 0 24px;
+  }
+
+  @media (max-width: 480px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .card, .output-card, .install-hint { padding: 20px; }
+    .os-btn { padding: 10px 4px; font-size: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.5a8.15 8.15 0 004.77 1.52V6.57a4.86 4.86 0 01-1-.12z"/></svg>
+    </div>
+    <div class="logo-text">YT<span>Grab</span></div>
+  </div>
+  <p>Generate <code style="font-family:JetBrains Mono,monospace;font-size:0.85em;color:var(--accent2)">yt-dlp</code> commands for downloading your own YouTube content</p>
+</header>
+
+<div class="card">
+
+  <!-- OS Selector -->
+  <label>Your operating system</label>
+  <div class="os-toggle">
+    <button class="os-btn active" id="btn-linux" onclick="setOS('linux')">
+      <span class="os-icon">🐧</span>
+      Debian / Ubuntu
+      <small>Zorin, Mint, etc.</small>
+    </button>
+    <button class="os-btn" id="btn-windows" onclick="setOS('windows')">
+      <span class="os-icon">🪟</span>
+      Windows
+      <small>PowerShell / CMD</small>
+    </button>
+    <button class="os-btn" id="btn-mac" onclick="setOS('mac')">
+      <span class="os-icon">🍎</span>
+      macOS
+      <small>Terminal</small>
+    </button>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Format -->
+  <label>Format</label>
+  <div class="format-toggle">
+    <button class="fmt-btn active" id="btn-mp3" onclick="setFormat('mp3')">
+      🎵 MP3
+      <small>Audio only</small>
+    </button>
+    <button class="fmt-btn" id="btn-mp4" onclick="setFormat('mp4')">
+      🎬 MP4
+      <small>Video + audio</small>
+    </button>
+  </div>
+
+  <!-- URL -->
+  <div class="field">
+    <label for="url-input">YouTube URL</label>
+    <input type="text" id="url-input" placeholder="https://youtube.com/watch?v=..." />
+    <div class="error-msg" id="url-error">Please enter a valid YouTube URL.</div>
+  </div>
+
+  <!-- Quality options -->
+  <div class="options-grid">
+    <div class="field" id="mp3-quality-field">
+      <label for="mp3-quality">Audio quality</label>
+      <div class="select-wrap">
+        <select id="mp3-quality">
+          <option value="0">Best (320 kbps)</option>
+          <option value="2">High (192 kbps)</option>
+          <option value="4">Medium (128 kbps)</option>
+          <option value="9">Small (64 kbps)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field" id="mp4-quality-field" style="display:none">
+      <label for="mp4-quality">Video quality</label>
+      <div class="select-wrap">
+        <select id="mp4-quality">
+          <option value="2160">4K (2160p)</option>
+          <option value="1440">2K (1440p)</option>
+          <option value="1080" selected>1080p</option>
+          <option value="720">720p</option>
+          <option value="480">480p</option>
+          <option value="360">360p</option>
+          <option value="best">Best available</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="output-dir">Save to folder</label>
+      <input type="text" id="output-dir" value="~/Downloads" />
+    </div>
+  </div>
+
+  <!-- Extras -->
+  <div class="extras">
+    <label style="margin-bottom:12px">Options</label>
+
+    <label class="check-row">
+      <input type="checkbox" id="chk-thumbnail" />
+      <span>Embed thumbnail <small>Adds cover art to the file</small></span>
+    </label>
+
+    <label class="check-row">
+      <input type="checkbox" id="chk-metadata" checked />
+      <span>Embed metadata <small>Title, channel, upload date</small></span>
+    </label>
+
+    <label class="check-row" id="chk-sub-row" style="display:none">
+      <input type="checkbox" id="chk-subs" />
+      <span>Embed subtitles <small>Auto-generated or manual captions</small></span>
+    </label>
+
+    <label class="check-row">
+      <input type="checkbox" id="chk-playlist" />
+      <span>Entire playlist <small>Download all videos if URL is a playlist</small></span>
+    </label>
+  </div>
+
+  <button class="generate-btn" onclick="generate()">Generate Command →</button>
+</div>
+
+<!-- Output -->
+<div class="output-card" id="output-card">
+  <div class="output-header">
+    <div class="output-title">Your Command</div>
+    <div class="os-badge" id="output-os-badge">Linux</div>
+  </div>
+  <div class="command-block">
+    <code id="command-text"></code>
+  </div>
+  <div class="output-actions">
+    <button class="copy-btn" id="copy-btn" onclick="copyCommand()">Copy to clipboard</button>
+    <button class="copy-btn" id="how-btn" onclick="showHowTo()">How to run this</button>
+  </div>
+</div>
+
+<!-- Install hint -->
+<div class="install-hint" id="install-hint">
+  <h3>Need yt-dlp?</h3>
+  <span class="os-label" id="hint-os-label">Debian / Ubuntu Linux</span>
+  <div id="hint-content"></div>
+</div>
+
+<script>
+  let currentOS     = 'linux';
+  let currentFormat = 'mp3';
+
+  const defaultDirs = {
+    linux:   '~/Downloads',
+    windows: '%USERPROFILE%\\Downloads',
+    mac:     '~/Downloads'
+  };
+
+  const osBadgeLabels = {
+    linux:   '🐧 Linux',
+    windows: '🪟 Windows',
+    mac:     '🍎 macOS'
+  };
+
+  const osHintLabels = {
+    linux:   'Debian / Ubuntu / Zorin OS',
+    windows: 'Windows (PowerShell or CMD)',
+    mac:     'macOS (Terminal)'
+  };
+
+  const installHints = {
+    linux: `
+      <p>Install yt-dlp and ffmpeg with apt:</p>
+      <div class="command-block"><code>sudo apt install yt-dlp ffmpeg</code></div>
+      <p>Or get the latest version directly:</p>
+      <div class="command-block"><code>sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp && sudo chmod a+rx /usr/local/bin/yt-dlp</code></div>
+      <p>ffmpeg is required for MP3 conversion and merging high-quality video+audio streams.</p>
+    `,
+    windows: `
+      <p>Install with <strong>winget</strong> (Windows 10/11):</p>
+      <div class="command-block"><code>winget install yt-dlp.yt-dlp</code></div>
+      <p>Also install ffmpeg (required for MP3 and high-quality MP4):</p>
+      <div class="command-block"><code>winget install Gyan.FFmpeg</code></div>
+      <p>Or download the <code>.exe</code> directly from <strong>github.com/yt-dlp/yt-dlp/releases</strong> and place it in a folder on your PATH (e.g. <code>C:\\Windows\\System32</code>).</p>
+      <p>Run commands in <strong>PowerShell</strong> or <strong>Command Prompt</strong> (search Start menu).</p>
+    `,
+    mac: `
+      <p>Install with <strong>Homebrew</strong> (recommended):</p>
+      <div class="command-block"><code>brew install yt-dlp ffmpeg</code></div>
+      <p>Don't have Homebrew? Install it first:</p>
+      <div class="command-block"><code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code></div>
+      <p>ffmpeg is required for MP3 conversion and merging high-quality video+audio streams.</p>
+    `
+  };
+
+  const howToMessages = {
+    linux:   '1. Open a terminal (Ctrl+Alt+T)\n2. Paste the command\n3. Press Enter\n\nYour file will appear in the folder you specified.',
+    windows: '1. Press Win+R, type "powershell", press Enter\n   (or search "PowerShell" in the Start menu)\n2. Paste the command\n3. Press Enter\n\nYour file will appear in the folder you specified.',
+    mac:     '1. Open Terminal (Cmd+Space → type "Terminal")\n2. Paste the command\n3. Press Enter\n\nYour file will appear in the folder you specified.'
+  };
+
+  function setOS(os) {
+    currentOS = os;
+    ['linux','windows','mac'].forEach(o =>
+      document.getElementById('btn-' + o).classList.toggle('active', o === os)
+    );
+    // Update default dir placeholder only if user hasn't typed a custom path
+    const dirInput = document.getElementById('output-dir');
+    const isDefault = Object.values(defaultDirs).includes(dirInput.value);
+    if (isDefault) dirInput.value = defaultDirs[os];
+
+    document.getElementById('hint-os-label').textContent = osHintLabels[os];
+    document.getElementById('hint-content').innerHTML = installHints[os];
+  }
+
+  function setFormat(fmt) {
+    currentFormat = fmt;
+    document.getElementById('btn-mp3').classList.toggle('active', fmt === 'mp3');
+    document.getElementById('btn-mp4').classList.toggle('active', fmt === 'mp4');
+    document.getElementById('mp3-quality-field').style.display = fmt === 'mp3' ? '' : 'none';
+    document.getElementById('mp4-quality-field').style.display = fmt === 'mp4' ? '' : 'none';
+    document.getElementById('chk-sub-row').style.display       = fmt === 'mp4' ? '' : 'none';
+  }
+
+  function isValidYTUrl(url) {
+    return /^https?:\/\/(www\.)?(youtube\.com\/(watch|playlist|shorts)|youtu\.be\/)/.test(url.trim());
+  }
+
+  function quoteArg(val, os) {
+    // Wrap in OS-appropriate quotes
+    if (os === 'windows') return `"${val}"`;
+    return `"${val}"`;
+  }
+
+  function generate() {
+    const url    = document.getElementById('url-input').value.trim();
+    const errEl  = document.getElementById('url-error');
+    const outCard = document.getElementById('output-card');
+
+    if (!url || !isValidYTUrl(url)) {
+      errEl.classList.add('visible');
+      outCard.classList.remove('visible');
+      return;
+    }
+    errEl.classList.remove('visible');
+
+    const outDir    = document.getElementById('output-dir').value.trim() || defaultDirs[currentOS];
+    const thumbnail = document.getElementById('chk-thumbnail').checked;
+    const metadata  = document.getElementById('chk-metadata').checked;
+    const playlist  = document.getElementById('chk-playlist').checked;
+    const subs      = document.getElementById('chk-subs').checked;
+
+    // On Windows, yt-dlp.exe may be needed if not on PATH; command is otherwise identical
+    let cmd = 'yt-dlp';
+
+    if (currentFormat === 'mp3') {
+      const q = document.getElementById('mp3-quality').value;
+      cmd += ` -x --audio-format mp3 --audio-quality ${q}`;
+      if (thumbnail) cmd += ' --embed-thumbnail';
+      if (metadata)  cmd += ' --embed-metadata';
+    } else {
+      const q = document.getElementById('mp4-quality').value;
+      if (q === 'best') {
+        cmd += ` -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]"`;
+      } else {
+        cmd += ` -f "bestvideo[height<=${q}][ext=mp4]+bestaudio[ext=m4a]/best[height<=${q}][ext=mp4]"`;
+      }
+      cmd += ' --merge-output-format mp4';
+      if (thumbnail) cmd += ' --embed-thumbnail';
+      if (metadata)  cmd += ' --embed-metadata';
+      if (subs)      cmd += ' --write-auto-sub --embed-subs';
+    }
+
+    if (!playlist) cmd += ' --no-playlist';
+
+    // Path separator and output template differ by OS
+    if (currentOS === 'windows') {
+      const winDir = outDir.replace(/\//g, '\\');
+      cmd += ` -o "${winDir}\\%(title)s.%(ext)s"`;
+    } else {
+      cmd += ` -o "${outDir}/%(title)s.%(ext)s"`;
+    }
+
+    cmd += ` "${url}"`;
+
+    document.getElementById('command-text').textContent = cmd;
+    document.getElementById('output-os-badge').textContent = osBadgeLabels[currentOS];
+    outCard.classList.add('visible');
+    outCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById('copy-btn').textContent = 'Copy to clipboard';
+    document.getElementById('copy-btn').classList.remove('copied');
+  }
+
+  function copyCommand() {
+    const text = document.getElementById('command-text').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy to clipboard';
+        btn.classList.remove('copied');
+      }, 2200);
+    });
+  }
+
+  function showHowTo() {
+    alert(howToMessages[currentOS]);
+  }
+
+  // Init install hint
+  setOS('linux');
+
+  document.getElementById('url-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') generate();
+  });
+</script>
+</body>
+</html>
